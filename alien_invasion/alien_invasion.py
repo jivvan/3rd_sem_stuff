@@ -1,12 +1,10 @@
-import sys
-from time import sleep
+import time
 from settings import Settings
+from game_stats import GameStats
 import pygame
 from ship import Ship
-from alien import Alien
 import game_functions as gf
 from pygame.sprite import Group
-
 
 def run_game():
     # initialize game and create a screen object
@@ -14,23 +12,42 @@ def run_game():
     ai_settings = Settings()
     screen = pygame.display.set_mode(
         (ai_settings.screen_width, ai_settings.screen_height))
-    pygame.display.set_caption("Testing Panda")
+    pygame.display.set_caption("Alien Invasion")
 
-    # Make a ship
+    # Create an instance to store game stats
+    stats = GameStats(ai_settings)
+
+    # Make a ship, a group of bullets, and a group of aliens
     ship = Ship(ai_settings, screen)
-
-    # Make a alien
-    alien = Alien(ai_settings,screen)
-
-    # Make a group to store bullets in
     bullets = Group()
+    aliens = Group()
+
+    gf.create_fleet(ai_settings, screen, ship, aliens)
+
+    # capping fps
+    time_1 = time.perf_counter()
+    unprocessed = 0
+    frame_cap = (1.0/240)
 
     # start the main loop for the game.
     while True:
-        gf.check_events(ai_settings,screen , ship, bullets)
-        ship.update()
-        gf.update_bullets(bullets)
-        gf.update_screen(ai_settings, screen, ship, alien, bullets)
+        can_render = False
+        time_2 = time.perf_counter()
+        passed = time_2 - time_1
+        unprocessed += passed
+        time_1 = time_2
+        while(unprocessed >=  frame_cap):
+            unprocessed -= frame_cap
+            can_render = True
+        
+        if can_render:    
+            gf.check_events(ai_settings,screen , ship, bullets)
+            if stats.game_active:
+                ship.update()
+                gf.update_bullets(ai_settings, screen,ship, aliens,bullets)
+                gf.update_aliens(ai_settings, stats, screen, ship, aliens, bullets)
+            gf.update_screen(ai_settings, screen, ship, aliens, bullets)
+
 
 
 run_game()
