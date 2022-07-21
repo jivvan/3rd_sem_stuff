@@ -1,10 +1,12 @@
 import time
+from button import Button
 from settings import Settings
 from game_stats import GameStats
 import pygame
 from ship import Ship
 import game_functions as gf
 from pygame.sprite import Group
+
 
 def run_game():
     # initialize game and create a screen object
@@ -13,6 +15,9 @@ def run_game():
     screen = pygame.display.set_mode(
         (ai_settings.screen_width, ai_settings.screen_height))
     pygame.display.set_caption("Alien Invasion")
+
+    # Make the play button
+    play_button = Button(ai_settings, screen, "Play")
 
     # Create an instance to store game stats
     stats = GameStats(ai_settings)
@@ -27,7 +32,7 @@ def run_game():
     # capping fps
     time_1 = time.perf_counter()
     unprocessed = 0
-    frame_cap = (1.0/240)
+    frame_cap = (1.0/1000)
 
     # start the main loop for the game.
     while True:
@@ -36,18 +41,20 @@ def run_game():
         passed = time_2 - time_1
         unprocessed += passed
         time_1 = time_2
-        while(unprocessed >=  frame_cap):
+        while(unprocessed >= frame_cap):
             unprocessed -= frame_cap
             can_render = True
-        
-        if can_render:    
-            gf.check_events(ai_settings,screen , ship, bullets)
+
+        if can_render:
+            gf.check_events(ai_settings, stats, screen, ship,
+                            aliens, bullets, play_button)
             if stats.game_active:
                 ship.update()
-                gf.update_bullets(ai_settings, screen,ship, aliens,bullets)
-                gf.update_aliens(ai_settings, stats, screen, ship, aliens, bullets)
-            gf.update_screen(ai_settings, screen, ship, aliens, bullets)
-
+                gf.update_bullets(ai_settings, screen, ship, aliens, bullets)
+                gf.update_aliens(ai_settings, stats, screen,
+                                 ship, aliens, bullets)
+            gf.update_screen(ai_settings, stats, screen, ship,
+                             aliens, bullets, play_button)
 
 
 run_game()
