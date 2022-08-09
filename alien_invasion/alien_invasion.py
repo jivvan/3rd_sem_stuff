@@ -3,6 +3,7 @@ from button import Button
 from settings import Settings
 from game_stats import GameStats
 import pygame
+from sfx import SFX
 from ship import Ship
 import game_functions as gf
 from pygame.sprite import Group
@@ -23,6 +24,7 @@ def run_game():
     # Create an instance to store game statistics and create a scoreboard
     stats = GameStats(ai_settings)
     sb = Scoreboard(ai_settings, screen, stats)
+    sfx = SFX()
 
     # Make a ship, a group of bullets, and a group of aliens
     ship = Ship(ai_settings, screen)
@@ -48,13 +50,13 @@ def run_game():
             can_render = True
 
         if can_render:
-            gf.check_events(ai_settings, stats, sb, screen, ship,
+            gf.check_events(ai_settings, stats, sb, sfx, screen, ship,
                             aliens, bullets, play_button)
             if stats.game_active:
                 ship.update()
                 gf.update_bullets(ai_settings, screen, stats,
-                                  sb, ship, aliens, bullets)
-                gf.update_aliens(ai_settings, stats, sb, screen,
+                                  sb, sfx, ship, aliens, bullets)
+                gf.update_aliens(ai_settings, stats, sb, sfx, screen,
                                  ship, aliens, bullets)
             gf.update_screen(ai_settings, stats, sb, screen, ship,
                              aliens, bullets, play_button)
